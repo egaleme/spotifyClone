@@ -7,6 +7,8 @@ import {
   Image,
   StatusBar,
   StyleSheet,
+  Modal,
+  TouchableOpacity,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -14,6 +16,9 @@ import {
 } from 'react-native-responsive-screen';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import LinearGradient from 'react-native-linear-gradient';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import {GrayShade, GrayDark, Green} from '../constants/colors';
 import {Gotham} from '../constants/fonts';
@@ -39,12 +44,13 @@ export default function RecentlyPlayed() {
     React.useCallback(state => state.toggleIsPlaying, []),
   );
   const playCurrentTrack = useAlbumStore(state => state.playCurrentTrack);
+  const selectedTrack = useAlbumStore(state => state.selectedTrack);
+  const now = useAlbumStore(state => state.now);
 
   React.useEffect(() => {
     getNewReleases();
     getRecentlyPlayed();
     getTopTracks();
-    GET_ACCESS_TOKEN().then(token => console.log(token));
   }, []);
 
   function _postSelectedTrack(track) {
@@ -224,6 +230,53 @@ export default function RecentlyPlayed() {
         </View>
       </ScrollView>
       <MiniPlayer onPress={playCurrentTrack} onPressPlay={toggleIsPlaying} />
+
+      <Modal animationType="slide" transparent={true} visible={now}>
+        <StatusBar translucent backgroundColor="#0b3057" />
+        <LinearGradient
+          colors={['#0b3057', '#051c30']}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={modalStyles.container}>
+          <View style={modalStyles.header}>
+            <TouchableOpacity onPress={playCurrentTrack}>
+              <Icon name="chevron-down-sharp" size={25} color="#fff" />
+            </TouchableOpacity>
+            <Text style={modalStyles.headerTitle}>{selectedTrack.artist}</Text>
+            <TouchableOpacity>
+              <Feather name="more-horizontal" color="#fff" size={25} />
+            </TouchableOpacity>
+          </View>
+          <Image
+            source={{uri: selectedTrack.image}}
+            style={modalStyles.headerImage}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginVertical: 10,
+            }}>
+            <View>
+              <Text style={modalStyles.trackText}>{selectedTrack.name}</Text>
+              <Text style={modalStyles.artistName}>{selectedTrack.artist}</Text>
+            </View>
+            <Feather name="heart" size={22} color="#fff" />
+          </View>
+          <View style={modalStyles.slider} />
+          <View style={modalStyles.controls}>
+            <Feather
+              name="shuffle"
+              color="rgba(255, 255, 255, 0.5)"
+              size={24}
+            />
+            <AntDesign name="stepbackward" color="white" size={32} />
+            <AntDesign name="play" color="white" size={48} />
+            <AntDesign name="stepforward" color="white" size={32} />
+            <Feather name="repeat" color="rgba(255, 255, 255, 0.5)" size={24} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -247,5 +300,53 @@ const styles = StyleSheet.create({
   trachName: {
     color: 'white',
     fontSize: hp('1.9%'),
+  },
+});
+
+const modalStyles = StyleSheet.create({
+  container: {
+    marginHorizontal: wp('10%'),
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: hp('5%'),
+  },
+  headerTitle: {
+    color: '#fff',
+    fontFamily: Gotham,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  headerImage: {
+    borderRadius: 4,
+    alignSelf: 'center',
+    width: wp('55%'),
+    height: wp('60%'),
+    marginBottom: hp('10%'),
+  },
+  trackText: {
+    color: '#fff',
+    fontFamily: Gotham,
+    fontSize: hp('2.5%'),
+    fontWeight: '700',
+  },
+  artistName: {
+    color: 'rgba(255,255,255,0.6)',
+    fontFamily: Gotham,
+    fontSize: hp('1.5%'),
+  },
+  slider: {
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    width: wp('85%'),
+    borderRadius: 2,
+    height: 4,
+    marginVertical: 16,
+  },
+  controls: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
   },
 });

@@ -9,7 +9,6 @@ export const useAuthStore = create((set, get) => ({
   loading: false,
   authenication: async (result, navigation) => {
     set({loading: true});
-    console.log('---- TOKENS ---:', result);
     if (result.accessToken != null && result.refreshToken != null) {
       set({
         accessToken: result.accessToken,
